@@ -25,13 +25,18 @@ def main(_):
     im_height = 1024
 
     # read satellite in_data
-    data_dir = FLAGS.data_dir
-    name_number = np.load(FLAGS.name_number)
+    data_dir = FLAGS.valid_dir
+    if FLAGS.data != "valid":
+        data_dir = FLAGS.test_dir + FLAGS.data
+
+    if FLAGS.data != "valid":
+        name_number = np.load(FLAGS.name_dir + FLAGS.data + ".npy")
+    else:
+        name_number = np.load(FLAGS.name_dir + FLAGS.data + "_" + FLAGS.side_length + ".npy")
+
     num = len(name_number)
 
-    prediction = np.load(FLAGS.prediction)
-
-    #print(np.any(prediction[:] == 255))
+    prediction = np.load("prediction_" + FLAGS.data + "_" + str(FLAGS.prediction_random_num) + ".npy")
 
     merged_np = np.zeros((im_height, im_width * 2, 3))
 
@@ -52,7 +57,7 @@ def main(_):
                 merged_np[:, 1024:, 2] = out_img * 255  #(1024, 1024) blue
 
             if FLAGS.out_label:
-                out_img = mpimg.imread((join(FLAGS.out_label_dir, out_name)))[:, :, 0]
+                out_img = mpimg.imread((join(FLAGS.label_dir, out_name)))[:, :, 0]
                 merged_np[:, 1024:, 2] = out_img * 255
 
             gray_img = sess.run(convert_gray, feed_dict={image_pholder: in_img})  #(1024, 1024, 1)
@@ -73,15 +78,18 @@ def main(_):
 if __name__ == '__main__':
 
     FLAGS = tf.app.flags.FLAGS
-    tf.app.flags.DEFINE_integer('gpu_id', 1, 'id ranges from 0 to 3')
-    tf.app.flags.DEFINE_integer('prediction_random_num', 5, 'map to the prediction')
-    tf.app.flags.DEFINE_string('data', 'test', 'validation or test')
+    tf.app.flags.DEFINE_integer('gpu_id', 3, 'id ranges from 0 to 3')
+    tf.app.flags.DEFINE_integer('prediction_random_num', 3, 'map to the prediction')
+    tf.app.flags.DEFINE_string('data', 'final_test', 'valid or dev_test or final_test')
     tf.app.flags.DEFINE_boolean('out_label', True, 'whether to use out labels')
-    tf.app.flags.DEFINE_string('name_number', 'dev_test_name_number.npy', 'the number names of data')
-    tf.app.flags.DEFINE_string('prediction', 'prediction_test_5.npy', 'prediction file')
-    tf.app.flags.DEFINE_string('data_dir', '/media/workspace/bgong/data/road-extraction/dev_test', 'test or validation data directory')
-    tf.app.flags.DEFINE_string('out_label_dir', '', 'outside label directory')
     tf.app.flags.DEFINE_integer('batch_size', 1, 'number of images per mini-batch')
+    tf.app.flags.DEFINE_string('test_dir', '/media/workspace/bgong/data/road-extraction/', 'test data directory')
+    tf.app.flags.DEFINE_string('valid_dir', '/media/workspace/bgong/data/road-extraction/train', 'validation data directory')
+
+    tf.app.flags.DEFINE_string('label_dir', '/home/chenny1229/label_from_website/', 'label directory')
+    tf.app.flags.DEFINE_string('name_dir', '/home/chenny1229/parameters/512/names/', 'name directory')
+    # name_dir need to be changed to bgong (cp names to bgong directory)
+    # label_dir also needs to be changed to bgong
 
     tf.logging.set_verbosity(tf.logging.INFO)
     tf.app.run()

@@ -49,8 +49,15 @@ def main(_):
     im_height = 1024
 
     # read satellite in_data
-    data_dir = FLAGS.data_dir
-    name_number = np.load(FLAGS.name_file)
+    data_dir = FLAGS.valid_dir
+    if FLAGS.data != "valid":
+        data_dir = FLAGS.test_dir + FLAGS.data
+
+    if FLAGS.data != "valid":
+        name_number = np.load(FLAGS.name_dir + FLAGS.data + ".npy")
+    else:
+        name_number = np.load(FLAGS.name_dir + FLAGS.data + "_" + FLAGS.side_length + ".npy")
+
     num = len(name_number)
     num = int(np.floor(num / FLAGS.batch_size)) * FLAGS.batch_size
     in_data = np.empty([num, im_height, im_width, 3], dtype=np.float32)
@@ -128,11 +135,10 @@ def main(_):
 if __name__ == '__main__':
 
     FLAGS = tf.app.flags.FLAGS
-    tf.app.flags.DEFINE_integer('gpu_id', 1, 'id ranges from 0 to 3')
-    tf.app.flags.DEFINE_integer('random_num', 5, 'random number')
+    tf.app.flags.DEFINE_integer('gpu_id', 3, 'id ranges from 0 to 3')
+    tf.app.flags.DEFINE_integer('random_num', 3, 'random number')
     tf.app.flags.DEFINE_integer('side_length', 512, 'image')
-    tf.app.flags.DEFINE_string('data', 'dev_test', 'valid or dev_test or final_test')
-    tf.app.flags.DEFINE_string('name_file', 'dev_test_name_number.npy', 'data name file')
+    tf.app.flags.DEFINE_string('data', 'final_test', 'valid OR dev_test OR final_test')
     tf.app.flags.DEFINE_integer('num_epochs', 40, 'number of training epochs')
     tf.app.flags.DEFINE_integer('depth', 4, 'number of depth')
     tf.app.flags.DEFINE_integer('num_classes', 2, 'number of segmentation classes')
@@ -142,7 +148,11 @@ if __name__ == '__main__':
     tf.app.flags.DEFINE_integer('batch_size', 1, 'number of images per mini-batch')
     tf.app.flags.DEFINE_string('data_format', 'channels_first', 'NCHW: channels_first, NHWC: channels_last')
     tf.app.flags.DEFINE_string('model_dir', '/home/rueisung/deep_globe/models/05042018', 'model directory')
-    tf.app.flags.DEFINE_string('data_dir', '/media/workspace/bgong/data/road-extraction/dev_test', 'test or valid data')
+    tf.app.flags.DEFINE_string('test_dir', '/media/workspace/bgong/data/road-extraction/', 'test data directory')
+    tf.app.flags.DEFINE_string('valid_dir', '/media/workspace/bgong/data/road-extraction/train', 'validation data directory')
+    tf.app.flags.DEFINE_string('name_dir', '/home/chenny1229/parameters/512/names/', 'name directory')
+    # name_dir need to be changed to bgong (cp names to bgong directory)
+
     tf.logging.set_verbosity(tf.logging.INFO)
     tf.app.run()
 
