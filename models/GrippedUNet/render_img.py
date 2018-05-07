@@ -21,6 +21,8 @@ def main(_):
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(FLAGS.gpu_id)
 
+    print(FLAGS.flag_values_dict())
+
     im_width = 1024
     im_height = 1024
 
@@ -56,9 +58,9 @@ def main(_):
                 out_img = mpimg.imread(join(data_dir, out_name))[:, :, 0]  #(1024, 1024)   (0 or 1)
                 merged_np[:, 1024:, 2] = out_img * 255  #(1024, 1024) blue
 
-            if FLAGS.out_label:
-                out_img = mpimg.imread((join(FLAGS.label_dir, out_name)))[:, :, 0]
-                merged_np[:, 1024:, 2] = out_img * 255
+            if FLAGS.out_label == True:
+                label_img = mpimg.imread((join(FLAGS.label_dir, out_name)))[:, :, 0]
+                merged_np[:, 1024:, 2] = label_img * 255
 
             gray_img = sess.run(convert_gray, feed_dict={image_pholder: in_img})  #(1024, 1024, 1)
 
